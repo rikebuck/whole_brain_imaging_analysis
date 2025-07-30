@@ -1,0 +1,453 @@
+ "2023-03-07-": 
+ spline_legnth : 110
+ ds:0.02
+
+frames_to_mask = [
+    list(range(1013, 1124)),  #  loopy and really doesnt caputure loopiness well.. can abstract awway as turn if want to.. 
+    list(range(7646, 7737)),  #  loopy and really doesnt caputure loopiness well.. can abstract awway as turn if want to.. 
+    list(range(12437, 12617)),  #  loopy and really doesnt caputure loopiness well.. can abstract awway as turn if want to.. 
+    list(range(16679, 16858)), #issue with stage -->  doesnt align to head super well
+]
+frames_to_mask = np.concatenate([np.array(f) for f in frames_to_mask])
+'''
+It might also be worth masking out midlines that were either not well extracted because of the posture, or because of the field of view...
+I am hard coding with frames these are for now.. 
+
+    - Mask out: 
+    - 1013 - 1124 - loopy and really doesnt caputure loopiness well.. can abstract awway as turn if want to.. 
+    - 7646 - 7737 - but mark as turn (this is okay just doesn follow head superrr well )...by 7754 it catches up 
+    - 12437-12617 - loopy and really doesnt caputure loopiness well.. can abstract awway as turn if want to.. 
+    - 14325 very short midline  - this is fine if only conside first 3/4 of worm..can keep 
+    - 16679-16824(def - 16858 - mask out 
+        - Mask out huge changes in stage velcoity
+        - Makes out when area too small) 
+
+    '''
+
+
+"2023-01-09-28"
+    - To mask: 
+        - frame_15110(17941) - frame_15116(179948)
+            - More optional - gets 
+        - frame_15179 (resampled = nir 18020) - nir 18047
+            - frame_15200***= 18045 (if only make one mask this) - frame_15210
+
+    - classification qs: 
+        - Some short revs are more like a pause- should look at velocit - frame confocal  143 resamples; 1422 resampled; nit 1835
+
+        -  turn classifcaiotn is ok for rev turns but not as good or spont turns 
+            - fwd->turn coutns turn pretty late in (i think because of criteria that HMvec >TMvec)
+                - frame_4454 - frame_4480 - I woudl call this a turn earlier (coutneed as forwards) 
+            - Frame 12345 resample (14374 nir) ; frame_12397 (14785 nir)  — feels more like a dwell-y thing to me (?) 
+            - frame_12494 - ambiguous if you want to call turn or reoritnatiaon .. — feels more like a dwell-y thing to me 
+            - Resampled frame_13088(15594)- frame_13120(nir 15636) - maybe this is turn / upsilon thing tbh) - its def a reorientation 
+                - (Classify turn by how different angle is after(?))
+
+            - frame_15110(17941) - frame_15116(179948) 
+                - Kind of a rev turn 
+                    - I think wasn’t counted because midline got cut off.. im okay with it being a tracking error though.. 
+                    - Could mask it.. 
+
+
+    - cut offqs: 
+
+"2022-07-26-01"
+    - a_to_p could be more like 5.8 - but doesnt seem to be an issue for turn classification 
+    - midline is flipped!
+
+    - To mask: 
+        - frame_4345nit 5652 frame_4491(5827)
+            - Looping and lost head 
+        - frame_5667(nir 7220) - frame_5680( nir 7236)
+            - Optional - head is just off
+        -  frame_7294 (nir9139) - frame_7311(nir9161)
+        - frame_8190(nir 10200) - frame; 8212(10225)8244(nir 10262) (nir - 8274(10298) 
+            - Head cropped do to poor masking of head) 
+        - frame_8830 (10956)- frame_8844 (nir 10972
+            - Optional not best head but fine 
+        - - check that length is okay vs cut off - (FOV is off)
+            - frame_10647(nrir 13084) 
+            - frame_14802(17904) -
+        - frame_11369 (nir 13921) - frame_11522 (nir 14097) 
+            - Loopy and lost head 
+        - frame_12187(nir 14872) - frame_12275(nir 14976) 
+            - Loopy and loses head) 
+        - frame_15888 (nir 19161) - frame_15965(nir 19252) - this Is more of a rev turn then a rev-> fwd-> turn 
+
+    - classification qs: 
+            - A lot of looping without reversals
+            - Animal might be in a differ “state” than others? 
+            - animal gets very loopy at the end 
+    - cut off qs: 
+    -   Tbh coudl do a better job masking to keep head(?) 
+
+#  "2022-06-14-01", 
+    to mask: 
+    - 409 - 1670 -head cut off - 421 (1695)
+    - frame_2076(nir 3647 ) - 2226 (nir 3825)  - looping and midilne missing head 
+    - frame_2289 (nir 3900) - frame_2308 (3921) - looping and midilne missing head 
+    - frame_5052 (nir 7100) - frame_5114(7231) - looping and midilne missing head (but not terriblee)
+    - frame_5220 (nirt 7360)- frame_5382(7545) - still loooping and missing head (but not terrriblee) 
+    - frame_8013 (10551) - frame_8235(10914) - still looping and missing head 
+    - frame_11589 (14818) - frame_11644(14482) - still looping and missing head 
+    - frame_11669(14911) - frame_11821(15087)- still looping and missing hea
+    - frame_13200(16686) - frame_13229(16719) 
+    - frame_13259 (16754) - frame_13386(16901) - 
+    - frame_13435(16958) - frame_13500 (17035 )
+    - frame_15306(19104) - frame_15515 (19354) - looping and head is off but kind of fine; 
+    - frame_15516(19355) - frame_15768(19649) - very wrong need to mask 
+
+    classification qs: -overall a very dwelly worm by thte end.. 
+
+    - 236 nir 1474 -267 (1511) feel arbitrary when count as turn (coudl happen earlier.. maybe this again is the forwards to turn vs rev to trun thing, --having it be based on tail > head  maybe doesn tmake sense )
+    - frame_0351 (1611)-  frame_0439 (1715)- why is it a turn? -
+    - frame_4130(6078) - frame_4169(6174) - why is it a turn 
+    - frame_11390 - frame_11479 is turn but then frame_11480 - frame_11509 is forwards? but then frame_11510 - frame_11685+++ is turn again but all felt like same action 
+    - frame_12699( 16104) - frame_12767 - is forwards; but then frame_12778(16197)- frame_12837(16265)  is turn .. 
+
+    - frame_1912 nir 3454- head touch during rev counting as turn - does it? ..im fine tiwht htat tbh 
+    - frame_5495 - i didn't realsit there were turns that start from a reversal-- tbh more of a really curvy reversal --- frame_5619
+    - frame_8523 (11255) - frame_8588 (113332) kind of like an upsilon
+    - frame_8900 - frame_9004 - kind of like an upsilon but counted as forwarrds (vs sometimes isnt) 
+    - - frame_13200(16686) - frame_13229(16719) - not sure why this is a turn.. -- also weird posture..
+    - frame_13260- ..i think this guy is dweelng or something.. very wierd psotures.. 
+    - frame_15830(19722) -  frame_15889 (19790) i thnk looping because cut off  but masked anyways.. 
+        (coudl use iddferent ato p?) -check 
+
+    cut offqs: 
+
+#  "2022-06-14-07"
+    params: 
+        a_to_p theres this one posture with reall high a to p even thoguh not turnign for some reason so hard to say correct thresh
+        length is really high liek up to 150; and multimodal.. 
+    to mask: 
+    - frame_1832 - head not exact but i think its fine. 
+    frame_1923 ( 3429) - frame_2091 (3628) - bad looping resolution
+    - frame_3329(5097) - frame_3509 ( 5311)- bad looping resolution
+    - frame_5427(7586) - frame_5465(7631) - msking issue
+    - frame_5515(7690) - frame_5568 (7753) - masking issue 
+    - 7501(10041) - frame_7505(10045)- masking issue 
+    - frame_11122(14280) - frame_11141(14301) - masking issue 
+    - frame_11299(14482) - frame_11335(14524) - masking issue 
+    - frame_11401(14600) - frame_11436 (14639) - shoudl get better maskign 
+    - frame_11547(14767) - frame_11577(14801)
+
+    classification qs: 
+    - frame_0720 - Head forwards tuouch during rev --> rev 
+    - frame_0911 - foreards rev-turn -> backwards ev and continue- is that how choose new roeor dirrection? 
+    - frame_1230 - turn coutned earlier porbs due to a to p? 
+
+    - frame_7321-frame_7409  - forwards redirection - missing thisclssificaiton
+    - frame_7500(10040) -why is thi sturn? hsoudl be forwards.. 
+    frame_8102 -frame_8147 upsiln oish turn not counted as turn 
+    cut offqs: 
+    -frame_6817 - frame_7031 maskign courl be better -head being lost a lot -- but oworm trcaer fixing 
+    frame_13702 - frame_13844 - tunr shoudl be counted as tunr earlier (smae frowds - > turn issue..)
+    - tunr as integrated head curvature over time above a certian amount? 
+
+
+#  "2022-07-15-06", 
+- body quite cut off.. ie frame_3076_nir_(7) ..actually head ok though 
+to mask: 
+ - frame_5097_nir_(6671) - frame_5120_nir_(6700) 
+ - frame_12017_nir_(14811) - frame_12068_nir_(14871)
+ *** midline flipp frame_12030_nir_(14827)
+
+
+
+#########
+#############not sure what this is .. 
+    to mask: 
+    frame_0000(1287) - frame_0035 ( 1328)
+    frame_0747(2175) 0frame_0775(2208)
+    frame_0848(2292) -frame_0904(2357)
+    frame_1164(2663) - frame_1220(2731)
+    frame_1586 -frame_1643(3229) masking issue + looping issue 
+    frame_4373(6452)- frame_4388(6469)
+    frame_4449(6541)- frame_4515(6618)
+    frame_4572(6687)0frame_4708 (6848)
+    frame_4890(7066) - frame_4964(7153) -loopin eiss
+    frame_5333() frame_5369(7632) - masking issue
+    frame_5614 (7922) - frame_5694(8017)
+    frame_7583(10254) 0 frame_7615(10291)
+    frame_8069(10828) - frame_8095(10859)
+    frame_8801 (11685) - frame_8942(11882) -masking and looping issue 
+    frame_10567(13755) - frame_11555(14895) - lenght too short - and interpolation issues from this; no things that woulere masked that should be other that werel; etc 
+    frame_11916 - (too short midline stuff will anyways be masked out so dont need ot worry) 
+    frame_12367 (15828) - frame_12420(15890)
+    frame_12508(15992) - frame_12621(161224) -- nooo midline gets flipped --- 
+    frame_12619(16122) - frame_12696(16210)
+    frame_12700(16214)- frame_13587(17239)...a lott of masking ssie 
+    frame_14328(18097) - frame_14401(18183)
+
+
+    ** midiline flipped frame_13150((16734)- and eaelir tb h but masked )
+    classification qs: 
+    - frame_0720 - shoudlnt be turn 
+    - frame_1654 - frame_2277 - same wierd roamy posture 
+    cut offqs: 
+    - frame_12700 - frame_12749 as turn 
+
+#########
+#############not sure what this is .. 
+
+"2022-06-28-07":
+    to mask  
+    frame_6196(nir8332) - frame_6243(8388)
+    frame_8004(10482) - frame8067(1055 ~~~check when have head id up to frame_8113)
+    frame_12177_nir_(15355) - frame_12274_nir_(15466)
+    frame_15909(19669) - frame_15960(19731)
+
+    frame_10322 - look good but check when have headid 
+
+
+
+   -mindline flip** frame_12215_nir_(5)nir 15398
+    classification qs: 
+    frame_5810 - frame_5849 should not be a turn 
+
+    cutoff qs:
+    - masking looks good
+
+
+
+
+
+#  "2022-06-14-13", 
+to mask: 
+    - "frame_1448" (2824) - frame_1488(2871)
+    frame_1991(3466) - frame_2146(3645)
+    frame_2593(4170) - frame_2610(4191)
+    frame_3507(5259) - frame_3531(5288)
+    frame_7185 (9591) - frame_7266 (9687)
+    frame_9402 (12210) - frame_9408 (12216)
+
+    classification qs: 
+    frame_1533- frame_1569 shouldnt be a turn 
+    frame_3070 - frame_3159 shouldnt be a turn 
+    frame_3660 - frame_3689 shouldnt be a turn 
+    frame_6000 - frame_6069 " " " 
+    frame_8851 - frame_8899  " " " 
+    frame_9300 -frame_9399
+    frame_9720 - frame_9789
+
+    cut offqs: 
+    masking is pretty good overall..defeintely tolerable 
+
+
+# "2023-01-23-21",
+to mask: 
+    - frame_0457_nir_(737) - frame_0779_nir_(1127)
+    - frame_9412_nir_(11352) - frame_9450_nir_(11399)
+    -  frame_9488_nir_(11442) - frame_9565_nir_(11535
+classification qs: 
+- frame_1290_sonfocal 130 - frame_1327_nir_confocal 133 not sure why turn (and aotto is is 5.0 so wierd) - beacue pre rev of rev turn.. 
+- frame_1990_cofocal 200 - frame_2008_confocal 201 
+cut offqs: 
+ - head basicall enitrly cut off the entrie time...   
+ - frame_0426_nir_(6) - nreally not great 
+ - maksing during looping somehtign foff - ie frame_9411_nir_(1)
+
+takeaways:  -head maskign could be better 
+
+
+# "2023-01-23-15", 
+
+to mask: 
+- frame_3853_nir_(4771) - frame_3915_nir_(4845)
+
+classification qs: 
+- frame_0744_nir_(4confal 75)(1) - frame_0788_confocal (49) is a turn? 
+cut offqs: 
+- head kind of cut off  but not alwasys (ie beginign vs frame_10312_nir_(2))
+
+takeaways:  -head maskign could be better 
+
+"2023-01-19-22"
+to mask: 
+classification qs: 
+cut offqs: 
+- body gets cut on and off; head looks fine 
+...coudl do both and use and*** 
+
+
+
+
+# "2023-01-23-08": 
+to mask: 
+- frame_3203_nir_(3936) - frame_3378_nir_(4134)
+- frame_3799_nir_(4644) - frame_3800_nir_(4646)
+classification qs: 
+cut offqs: 
+- head cut off quite often (ie frame_9182_nir_(2) - full cut off) 
+
+#2022-06-28-01
+to mask: 
+    - frame_0000
+classification qs: 
+cut offqs: 
+
+
+#"2022-07-20-01"
+
+
+frame_2602_nir_(3367)- frame_2655_nir_(3430) 
+frame_3571_nir_(4517) - frame_3642_nir_(2)(4601) 
+frame_13733_nir_(16419) - frame_13883_nir_(16591)
+frame_15759_nir_(18754) - frame_15813_nir_(18820)
+maksing good ; head masking very tgoo d
+
+
+clasifciaotn 
+- fwds but shoudl be turn? frame_15704_nir_(4)- frame_15777_nir_(7)
+to mask: 
+
+
+frame_1079_nir_(1558) - frame_1202_nir_(1702)
+frame_4674_nir_(5798) - frame_4831_nir_(5986)
+frame_5009_nir_(6195) - frame_5652_nir_(6955)
+
+
+
+classification qs: 
+
+cut offqs: 
+- head and body cutt fff ~ 6109 but otherwsie ok 
+
+# "2023-01-19-15", 
+- maksing very good 
+
+like no loopy turns 
+non loopy tunrs kind randomly called revs or turn of forwrds ie frame_8271_nir_(1) - frame_8380_nir_(0) - shoudl be turn.. 
+
+
+# "2023-01-19-22", 
+# "2023-01-23-01", 
+    to mask 
+    - frame_7357_nir_(8899)- frame_7439_nir_(8997
+    - frame_8177_nir_(9872) - frame_8191_nir_(9889) 
+    - frame_8981_nir_(10824)- frame_9191_nir_(11071)
+
+
+    head masking god; body masking not baddd 
+
+#  "2023-01-19-01", 
+    - frame_4298_nir_(5306) - frame_4348_nir_(5366) 
+    - frame_4958_nir_(6084) - frame_5027_nir_(6165) 
+    - frame_14779_nir_(17596) - frame_15999_nir_(19014)
+        maksign of head allittle off and on 
+
+    beh classification: 
+    frame_6456_nir_(7860)  - fwd - turn clasifciaotn happens later 
+
+# "2023-01-19-08", 
+  - frame_0947_nir_(1281) -  frame_1029_nir_(1379)
+  - frame_2556_nir_(3195) - frame_2606_nir_(3254) 
+  - frame_2656_nir_(3314) - frame_2669_nir_(3330)
+  - frame_3218_nir_(3982) - frame_3335_nir_(4121) 
+  - frame_5531_nir_(6735) - frame_5581_nir_(6795) 
+  - frame_6561_nir_(7960) - frame_6628_nir_(8039)
+  - frame_7851_nir_(9493) - frame_7888_nir_(9526)
+  #  - frame_9164_nir_(11043)  - frame_9246_nir_(11140) # Optional 
+  - frame_15198_nir_(18030) - frame_15331_nir_(18184)
+
+  clasifciaotn qs - how did  frame_12570_nir_(0) - frame_12589_nir_(11) become turn?
+
+  maksing of head good, 
+
+#  "2022-07-15-12", 
+    to mask: 
+    frame_1084 (1564) - frame_1198(1697) - head off but kind of fine.. 
+    frame_4680 (5806) - frame_4814(5965)
+    frame_8001_nir_(9744) - frame_8004_nir_(9747)
+    *** midiline flips at nir 5862***
+    flips back at nir 9529**  
+
+    classification qs: 
+    frame_2620- frame_2669 tunr probs because cut off - maybe shoudl have some turn + mdilie is certain amount of curvy as cut off** 
+    frame_4480 - frame4637 0 same called tunr but why  --- probs based on flavell midline.. 
+    cut offqs: 
+    -- lotss of midlien cut -- assumgin tis will be taken care of -- but mostly because FOV is cut off
+
+
+    **mdiline got flipped sometime pre frame_5982-- figure out when**-- porbs arounf nir full_line_image05949 - but shoudl plot head 
+
+
+"2022-06-28-01":
+
+
+    to mask: 
+    - frame_0000_nir_(0)- =frame_0055_nir_(1352)
+    = frame_0849_nir_(2294) - frame_0920_nir_(2376)
+    frame_1574_nir_(3148) - frame_1675_nir_(3267)
+    frame_3509_nir_(5441) - frame_3569_nir_(5510)
+    frame_3968_nir_(5972) - frame_3997_nir_(6007)
+    frame_4449_nir_(6541) - frame_4517_nir_(6620)
+    frame_4562_nir_(6675) - frame_4703_nir_(6843)
+    frame_4886_nir_(7060) - frame_4967_nir_(7157)
+    frame_5633_nir_(7944) - frame_5717_nir_(8044)
+    frame_8431_nir_(11256) - frame_8488_nir_(11323)
+    frame_8594_nir_(11450) - frame_8618_nir_(11478))
+    frame_8792_nir_(11685) - frame_8939_nir_(11858)
+    frame_10535_nir_(13718) - frame_10758_nir_(13973)
+    frame_11319_nir_(14622) - frame_11510_nir_(14842)
+    frame_12377_nir_(15940) - frame_12427_nir_(15898)
+    frame_12507_nir_(15991) - frame_12581_nir_(16078)
+    frame_13278_nir_(16880) - frame_13380_nir_(17000)
+    frame_13563_nir_(17211) - frame_13605_nir_(17260)
+
+    ** mdilen flip at frame_12579_nir_(16075) 
+    classification qs: 
+
+
+
+    cut 0off - head masking chaigns 
+
+
+"2022-07-15-12":
+
+    frame_1163_nir_(2662) - frame_1224_nir_(2736)
+    frame_10913_nir_(13163) - frame_10970_nir_(13229) 
+    frame_14226_nir_(17001) - frame_14263_nir_(17048)
+    frame_15497_nir_(18462) - frame_15533_nir_(18504) 
+    frame_15589_nir_(18568) - frame_15610_nir_(0)(18594)
+
+
+"2022-08-02-01":
+to_mask: 
+    frame_4854_nir_(6288) - frame_4957_nir_(6411)
+    frame_4982_nir_(6411) -  frame_5019_nir_(6485)
+    frame_9301_nir_(11556) - frame_9350_nir_(11615)
+    frame_13722_nir_(16690) - frame_13740_nir_(16711)
+
+
+    **mdilen flips at 11556
+    - masking of boyd (at bottom of frame) coudl be better ie frame_4504_nir_(4) 
+    head pretty fine -eh gets curr around 6534 but not bad..? 
+
+
+
+"2023-01-17-01":
+
+to mask : 
+
+frame_0227_nir_(455) - frame_0512_nir_(794) (frame_0378_nir_(634) if less stirngent0 
+frame_0916_nir_(1276) - frame_1058_nir_(1445) - would be cleaner isf masked inner loop conoutr properly 
+frame_1142_nir_(1546) - frame_1445_nir_(1907) - masking too strong (ie noo cutoss is my guess but issues with loop )
+frame_1627_nir_(2123) - frame_1830_nir_(2365) 
+frame_2149_nir_(2743) - frame_2196_nir_(2797)
+frame_3060_nir_(3820) -frame_3305_nir_(4112)
+frame_4138_nir_(5103) - frame_4328_nir_(5329)
+frame_4590_nir_(5642) - frame_4735_nir_(5814)
+full_line_image06533 - full_line_image06887
+
+frame_6909_nir_(8389) - frame_7004_nir_(8502)
+frame_10286_nir_(12409) - frame_10360_nir_(12499) 
+frame_10379_nir_(12521) - frame_10862_nir_(13083)
+frame_11566_nir_(13899) - frame_11890_nir_(14275)
+frame_12599_nir_(15098) - frame_12648_nir_(15155)
+frame_14112_nir_(16857) - frame_14375_nir_(17164)
+**mdilne flips at frame_4715_nir_(5791) and back at 5579(6818)
+
+
+worm quite curvy but midline resolutoi n of curvy not oot beaucs not getting good looping resoltuion; -- but also maksign eveyrhting so porba shoudl have both strageties. 
