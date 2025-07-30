@@ -326,7 +326,7 @@ def get_state_start_ends(state, stateseq,  starts= None, ends = None):
 ###############################
 
 def get_motor_state_start_end_is_rslds_start_end_specific(motor_state, exp_dates, z, q_z,  rslds_states = [0,1,2], start = None, end = None, plot = False):
-    rslds_pairs = permutations(rslds_states)
+    # rslds_pairs = permutations(rslds_states)
     rslds_pairs = [(x,y) for x in rslds_states for y in rslds_states]
     if start is None: 
         start = 0 
