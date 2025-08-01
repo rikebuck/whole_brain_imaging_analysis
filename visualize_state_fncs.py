@@ -25,7 +25,7 @@ from get_data.read_neuro_beh_data import get_exp_features, load_json
 
 sys.path.append('/Users/friederikebuck/Desktop/MBL/project/WholeBrainImagingAnalysis/collab/')
 from beh_classification.process_midlines.midline_utils import save_as_csv, load_from_csv, convert_coordinates_to_angles
-from rslds_motor_state_class_fncs import get_motor_state_start_end_is_rslds_start_end_specific
+# from rslds_motor_state_class_fncs import get_motor_state_start_end_is_rslds_start_end_specific
 
 from load_data_fncs import load_all_data, get_exp_dates
 
@@ -34,7 +34,90 @@ from plotting_utils import plot_probabilities_hist, plot_hist_across_conditins_a
 from categorize_reor_fncs import get_state_start_ends
 
 
-def get_motor_state_start_end_is_rslds_start_end_specific_1(motor_states, rslds_states, z, q_z):
+
+
+def interpolates_discrete(labels, n_target = 100):
+    n_original = len(labels)
+    # Target number of frames
+    n_target = 100
+
+    # Create interpolation function using nearest-neighbor
+    interp_func = interp1d(np.linspace(0, 1, n_original),
+                        labels,
+                        kind='nearest')
+
+    # Interpolate to 100 frames
+    interpolated_labels = interp_func(np.linspace(0, 1, n_target)).astype(int)
+    return interpolated_labels
+
+def plot_rslds_segments_heatmap(state_to_track_start_end_is, state_to_label,motor_state_num_to_name,  row_height = 0.15, col_width = 0.1):
+    #color palette for plotting, colors as in make_behavior_ethogram
+    palette = ["coral",     # forward
+            "lightblue", # reverse
+            "darkgreen", # turn
+            # "purple","red", "yellow", "black", "pink"
+            ]    # pause
+    cmap = LinearSegmentedColormap.from_list("behavior", palette, N=len(palette))
+
+    for state, track_start_end_is1 in state_to_track_start_end_is.items():
+        motor_state, (rslds_start_state, rslds_end_state) = state_to_label[state]
+        n_rows = track_start_end_is1.shape[0]
+        n_cols = 100
+        figsize = (n_cols * col_width*2, n_rows * row_height)
+        fig, axs = plt.subplots(1,2, figsize=figsize, sharey = True)
+        rslds_clips = []
+        
+        durations = track_start_end_is1[:, 2]-track_start_end_is1[:, 1]
+        track_start_end_is = copy.deepcopy(track_start_end_is1)[durations>1]
+        durations = track_start_end_is[:, 2]-track_start_end_is[:, 1]
+        for track, start, end in track_start_end_is:
+            rslds_clip = q_z[track, start:end]
+            rslds_clip_normalized =  interpolates_discrete(rslds_clip, n_target = 100 )###but interpoalte into discret states--can make longer or?
+            rslds_clips.append(rslds_clip_normalized.astype('int'))
+        if len(rslds_clips) ==0: 
+            continue
+        rslds_clips = np.array(rslds_clips)
+        # print(np.unique(rslds_clips))
+        sort_i = np.argsort(durations)
+        rslds_clips = rslds_clips[sort_i]
+        durations = durations[sort_i]
+
+
+        ax = axs[0]
+        axs[0].imshow(np.array(rslds_clips), cmap = cmap, vmin=0, vmax=len(palette)-1,  aspect='auto')
+        ax.set_title(f"{rslds_start_state, rslds_end_state }{motor_state_num_to_name[motor_state]}")
+        
+        ax1 = axs[1]
+        # Plot the durations as a horizontal bar plot
+        y_pos = np.arange(len(durations))  # One bar per row/trial
+        ax1.barh(y_pos, durations, color='gray', edgecolor='k')
+        ax1.set_ylim(ax.get_ylim())  # Align y-axis with the heatmap
+        ax1.invert_yaxis()  # Match imshow orientation (top = 0)
+        ax1.set_xlabel("Duration (frames)")
+        ax1.set_title("Duration per trial")
+
+def filter_motor_state_start_end_is_by_proportion(state_to_track_start_end_is, state_to_lbl, q_z, proportion_thres = 0.6):
+    state_to_track_start_end_is_over = {}
+    state_to_track_start_end_is_under = {}
+    
+    for state, track_start_end_is in state_to_track_start_end_is.items():
+        over_thresh_start_end_is = []
+        under_thresh_start_end_is =[]
+        motor_state, (start_state, end_state) = state_to_lbl[state]
+        for i, (track, start, end) in enumerate(track_start_end_is):
+            n_frames = end-start
+            n_motor_state_counts = np.argwhere(q_z[track, start:end]==motor_state).flatten().size
+            if n_motor_state_counts/n_frames > proportion_thres:
+                over_thresh_start_end_is.append(i)
+            else: 
+                under_thresh_start_end_is.append(i)
+        
+        state_to_track_start_end_is_over[state] = track_start_end_is[over_thresh_start_end_is, :]
+        state_to_track_start_end_is_under[state] = track_start_end_is[under_thresh_start_end_is, :]
+    return state_to_track_start_end_is_over, state_to_track_start_end_is_under
+
+
+def get_motor_state_start_end_is_rslds_start_end_specific_1(motor_states, rslds_states, z, q_z, filter_duration_thres = 0):
 
     state_to_track_start_end_is = {}
     state_to_lbl = {}
@@ -67,11 +150,17 @@ def get_motor_state_start_end_is_rslds_start_end_specific_1(motor_states, rslds_
                 all_tracks.append(np.ones(starts.shape[0])*track)
                 all_starts.append(starts)
                 all_ends.append(ends)
-            state_to_track_start_end_is[state] = np.concatenate([
+            track_start_end_is =  np.concatenate([
                                                     np.concatenate(all_tracks)[:,None],
                                                     np.concatenate(all_starts)[:,None],
                                                     np.concatenate(all_ends)[:,None]
-                                                ], axis = 1).astype('int')
+                                                ], axis = 1)
+            
+            durations = track_start_end_is[:,2] - track_start_end_is[:,1]
+            track_start_end_is = track_start_end_is[durations>filter_duration_thres]
+            state_to_track_start_end_is[state] = track_start_end_is.astype('int')
+            
+            
             state+=1
 
     return state_to_lbl,  state_to_track_start_end_is
