@@ -691,49 +691,49 @@ from spont_rev_prediction_fncs import plot_mean_line_graph_with_individ_traces, 
 # #     return buffered_event_features
 
 
-# def align_feature_to_rev_start_from_start_end_is(feature_val, event_start_end_is,  n_pre_frames = 60, max_plotting_length_frames = 500, 
-#                                rev_duration_min_frames = None, rev_duration_max_frames = None ,  rev_state = 1, starts =None, ends = None, 
-#                             #    earliest_start_frame = None, earliest_end_frame = None
+def align_feature_to_rev_start_from_start_end_is(feature_val, event_start_end_is,  n_pre_frames = 60, max_plotting_length_frames = 500, 
+                               rev_duration_min_frames = None, rev_duration_max_frames = None ,  rev_state = 1, starts =None, ends = None, 
+                            #    earliest_start_frame = None, earliest_end_frame = None
                                
-#                                ):
+                               ):
     
-#     buffered_event_features = []
-#     durations = event_start_end_is[:,2]-event_start_end_is[:,1]
-#     dur_bool = np.logical_and(durations>rev_duration_min_frames, durations<=rev_duration_max_frames).astype('bool')
-#     event_start_end_is_duration = event_start_end_is[dur_bool]
-#     for track, rev_start_i, rev_end_i in event_start_end_is_duration:
+    buffered_event_features = []
+    durations = event_start_end_is[:,2]-event_start_end_is[:,1]
+    dur_bool = np.logical_and(durations>rev_duration_min_frames, durations<=rev_duration_max_frames).astype('bool')
+    event_start_end_is_duration = event_start_end_is[dur_bool]
+    for track, rev_start_i, rev_end_i in event_start_end_is_duration:
         
-#     # # for i, (featureseq, z_w) in enumerate(zip(feature_val,z)):
-#     #     # rsldsseq = date_to_discrete_rslds_states[exp_date]
+    # # for i, (featureseq, z_w) in enumerate(zip(feature_val,z)):
+    #     # rsldsseq = date_to_discrete_rslds_states[exp_date]
         
-#     #     # featureseq = exp_date_to_feature[exp_date]
-#     #     # state_starts, state_ends = get_state_start_ends(
-#     #     #                                                 rev_state,
-#     #     #                                                 z_w,  
-#     #     #                                                 starts= None, 
-#     #     #                                                 ends = None
-#     #     #                                                 )
-#     #     # for rev_start_i,rev_end_i in zip( state_starts, state_ends):
+    #     # featureseq = exp_date_to_feature[exp_date]
+    #     # state_starts, state_ends = get_state_start_ends(
+    #     #                                                 rev_state,
+    #     #                                                 z_w,  
+    #     #                                                 starts= None, 
+    #     #                                                 ends = None
+    #     #                                                 )
+    #     # for rev_start_i,rev_end_i in zip( state_starts, state_ends):
         
-#     #         rev_duration_frames = rev_end_i-rev_start_i
-#     #         if rev_duration_frames>=rev_duration_min_frames and rev_duration_frames<rev_duration_max_frames:
+    #         rev_duration_frames = rev_end_i-rev_start_i
+    #         if rev_duration_frames>=rev_duration_min_frames and rev_duration_frames<rev_duration_max_frames:
 
-#             frame_start = max(rev_start_i-n_pre_frames, 0)
-#             frame_end = min(rev_start_i+max_plotting_length_frames, rev_end_i)
+            frame_start = max(rev_start_i-n_pre_frames, 0)
+            frame_end = min(rev_start_i+max_plotting_length_frames, rev_end_i)
         
-#             n_rev_frames = frame_end-rev_start_i
-#             n_fwd_frames = rev_start_i-frame_start
-#             buffered_event_feature = np.zeros(n_pre_frames+max_plotting_length_frames)
-#             buffered_event_feature[:] = np.nan
-#             buffered_event_feature[int(n_pre_frames+-1*n_fwd_frames):int(n_pre_frames+n_rev_frames)] = feature_val[track, frame_start:frame_end]
-#             buffered_event_features.append(buffered_event_feature[:, None])
+            n_rev_frames = frame_end-rev_start_i
+            n_fwd_frames = rev_start_i-frame_start
+            buffered_event_feature = np.zeros(n_pre_frames+max_plotting_length_frames)
+            buffered_event_feature[:] = np.nan
+            buffered_event_feature[int(n_pre_frames+-1*n_fwd_frames):int(n_pre_frames+n_rev_frames)] = feature_val[track, frame_start:frame_end]
+            buffered_event_features.append(buffered_event_feature[:, None])
 
-#     if len(buffered_event_features)==0: 
-#         return np.array([])
+    if len(buffered_event_features)==0: 
+        return np.array([])
 
-#     # buffered_event_features = np.concatenate(buffered_event_features, axis = 0)
-#     buffered_event_features = np.concatenate(buffered_event_features, axis = 1)
-#     return buffered_event_features
+    # buffered_event_features = np.concatenate(buffered_event_features, axis = 0)
+    buffered_event_features = np.concatenate(buffered_event_features, axis = 1)
+    return buffered_event_features
 
 
 # def align_feature_to_rev_end_from_start_end_is(feature_val, event_start_end_is,  
