@@ -736,7 +736,7 @@ def align_feature_to_rev_start_from_start_end_is(feature_val, event_start_end_is
 
 def align_feature_to_rev_end_from_start_end_is(feature_val, event_start_end_is,  
                             n_pre_frames = 90, max_plotting_length_frames = 150, 
-                            rev_duration_min_frames = -1, rev_duration_max_frames = np.inf,  rev_state = 1
+                            rev_duration_min_frames = -1, rev_duration_max_frames = np.inf
     ):
 
     n_frames = feature_val.shape[1]

@@ -174,3 +174,34 @@ def count_zero_crossing(body_angle, starts, ends):
         
     # print(total_crossings,crossings_is )
     return total_crossings, np.concatenate(crossings_is)
+
+
+    
+def get_state_to_track_start_end_is(motor_states_mat, states = None):
+    if states is None: 
+        states = np.unique(motor_states_mat)
+    state_to_track_start_end_is = {}
+    
+    for state in states:#[0,1,2]:
+        
+
+            
+        all_tracks = []
+        all_starts = []
+        all_ends = []
+        for track, state_track in enumerate(motor_states_mat):
+        # for track, (state_track, q_z_w) in enumerate(zip( z, q_z)):# (exp_date, behseq) in exp_date_to_beh.items():
+            starts, ends = get_state_start_ends(state, state_track,  starts= None, ends = None)
+            
+
+            all_tracks.append(np.ones(starts.shape[0])*track)
+            all_starts.append(starts)
+            all_ends.append(ends)
+        state_to_track_start_end_is[state] = np.concatenate([
+                                                np.concatenate(all_tracks)[:,None],
+                                                np.concatenate(all_starts)[:,None],
+                                                np.concatenate(all_ends)[:,None]
+                                            ], axis = 1).astype('int')
+
+
+    return  state_to_track_start_end_is
